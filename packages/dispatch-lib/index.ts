@@ -39,6 +39,28 @@ export class DispatchClient {
 
 	}
 
+	async getSafeSession() {
+
+		const {
+			data: { session },
+		} = await this.supabase.auth.getSession();
+
+		if (!session) {
+			return { session: null, user: null, error: 'No session found' };
+		}
+
+		const {
+			data: { user },
+			error: userError,
+		} = await this.supabase.auth.getUser();
+		if (userError) {
+			return { session, user: null, error: userError.message };
+		}
+
+		return { session, user, error: null };
+
+	}
+
 }
 
 export * from './id.ts'

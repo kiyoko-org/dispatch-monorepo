@@ -6,8 +6,8 @@ import { type PostgrestSingleResponse } from "@supabase/supabase-js";
 type UsehotlinesReturn = {
 	hotlines: Database["public"]["Tables"]["hotlines"]["Row"][];
 	fetchHotlines?: () => Promise<PostgrestSingleResponse<any[]>>;
-	addHotline?: (payload: Database["public"]["Tables"]["hotlines"]["Insert"]) => Promise<{ data: any[] | null; error: any }>;
-	updateHotline?: (id: number, payload: Partial<Database["public"]["Tables"]["hotlines"]["Update"]>) => Promise<{ data: any[] | null; error: any }>;
+	addHotline: (payload: Database["public"]["Tables"]["hotlines"]["Insert"]) => Promise<{ data: any[] | null; error: any }>;
+	updateHotline: (id: number, payload: Partial<Database["public"]["Tables"]["hotlines"]["Update"]>) => Promise<{ data: any[] | null; error: any }>;
 	deleteHotline: (id: number) => Promise<{ data: any[] | null; error: any }>;
 }
 

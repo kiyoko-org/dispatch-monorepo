@@ -1,26 +1,27 @@
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import type { SupabaseClient, SupportedStorage } from "@supabase/supabase-js";
 import { SupabaseAuthClient } from "@supabase/supabase-js/dist/module/lib/SupabaseAuthClient";
+import type { Database } from "./database.types";
 
 interface SupabaseClientOptions {
-  url: string;
-  anonymousKey: string;
-  detectSessionInUrl?: boolean;
-  storage?: SupportedStorage;
+	url: string;
+	anonymousKey: string;
+	detectSessionInUrl?: boolean;
+	storage?: SupportedStorage;
 }
 
 /**
  * Options required to initialize the DispatchClient singleton.
  */
 export interface DispatchClientOptions {
-  supabaseClientConfig: SupabaseClientOptions;
+	supabaseClientConfig: SupabaseClientOptions;
 }
 
 /**
  * Small extension type so we can use the auth API surface with correct typing.
  * (Kept as a distinct type in case we want to extend behavior later.)
  */
-class DispatchAuthClient extends SupabaseAuthClient {}
+class DispatchAuthClient extends SupabaseAuthClient { }
 
 /**
  * DispatchClient is a singleton that holds a private Supabase client instance.
@@ -31,108 +32,127 @@ class DispatchAuthClient extends SupabaseAuthClient {}
  *   - Retrieve the singleton via `getDispatchClient()` thereafter.
  */
 export class DispatchClient {
-  // private singleton instance
-  private static _instance: DispatchClient | null = null;
+	// private singleton instance
+	private static _instance: DispatchClient | null = null;
 
-  // private supabase client (not exported)
-  private supabase: SupabaseClient;
-  // expose only the auth surface that the library wants to make available
-  public auth: SupabaseAuthClient;
+	// private supabase client (not exported)
+	private supabase: SupabaseClient;
+	// expose only the auth surface that the library wants to make available
+	public auth: SupabaseAuthClient;
 
-  // Make constructor private to enforce singleton usage via init/getInstance
-  private constructor({ supabaseClientConfig }: DispatchClientOptions) {
-    this.supabase = createSupabaseClient(
-      supabaseClientConfig.url,
-      supabaseClientConfig.anonymousKey,
-      {
-        auth: {
-          storage: supabaseClientConfig.storage,
-          autoRefreshToken: true,
-          persistSession: true,
-          detectSessionInUrl: supabaseClientConfig.detectSessionInUrl ?? false,
-        },
-      },
-    );
+	// Make constructor private to enforce singleton usage via init/getInstance
+	private constructor({ supabaseClientConfig }: DispatchClientOptions) {
+		this.supabase = createSupabaseClient(
+			supabaseClientConfig.url,
+			supabaseClientConfig.anonymousKey,
+			{
+				auth: {
+					storage: supabaseClientConfig.storage,
+					autoRefreshToken: true,
+					persistSession: true,
+					detectSessionInUrl: supabaseClientConfig.detectSessionInUrl ?? false,
+				},
+			},
+		);
 
-    this.auth = this.supabase.auth as DispatchAuthClient;
+		this.auth = this.supabase.auth as DispatchAuthClient;
 
-    // Example internal listener — keeps this instance aware of auth changes.
-    this.auth.onAuthStateChange((event, session) => {
-      console.debug("DispatchClient auth state changed:", { event, session });
-    });
-  }
+		// Example internal listener — keeps this instance aware of auth changes.
+		this.auth.onAuthStateChange((event, session) => {
+			console.debug("DispatchClient auth state changed:", { event, session });
+		});
+	}
 
-  /**
-   * Initialize the singleton. Must be called once by the consumer if they want
-   * the library to manage a Supabase client internally.
-   *
-   * This is idempotent: subsequent calls will return the already-initialized instance.
-   */
-  static init(options: DispatchClientOptions) {
-    if (!DispatchClient._instance) {
-      DispatchClient._instance = new DispatchClient(options);
-    } else {
-      // Intentionally do not reinitialize; silently return existing instance.
-      console.warn(
-        "DispatchClient.init called but instance already exists. Returning existing instance.",
-      );
-    }
-    return DispatchClient._instance;
-  }
+	/**
+	 * Initialize the singleton. Must be called once by the consumer if they want
+	 * the library to manage a Supabase client internally.
+	 *
+	 * This is idempotent: subsequent calls will return the already-initialized instance.
+	 */
+	static init(options: DispatchClientOptions) {
+		if (!DispatchClient._instance) {
+			DispatchClient._instance = new DispatchClient(options);
+		} else {
+			// Intentionally do not reinitialize; silently return existing instance.
+			console.warn(
+				"DispatchClient.init called but instance already exists. Returning existing instance.",
+			);
+		}
+		return DispatchClient._instance;
+	}
 
-  /**
-   * Retrieve the singleton instance. Throws if `init` has not been called.
-   */
-  static getInstance() {
-    if (!DispatchClient._instance) {
-      throw new Error(
-        "DispatchClient not initialized. Call DispatchClient.init(...) first.",
-      );
-    }
-    return DispatchClient._instance;
-  }
+	/**
+	 * Retrieve the singleton instance. Throws if `init` has not been called.
+	 */
+	static getInstance() {
+		if (!DispatchClient._instance) {
+			throw new Error(
+				"DispatchClient not initialized. Call DispatchClient.init(...) first.",
+			);
+		}
+		return DispatchClient._instance;
+	}
 
-  /**
-   * Example helper that uses the private supabase client to return a safe session result.
-   * Consumers can call this via the singleton.
-   */
-  async getSafeSession() {
-    const {
-      data: { session },
-    } = await this.supabase.auth.getSession();
+	/**
+	 * Example helper that uses the private supabase client to return a safe session result.
+	 * Consumers can call this via the singleton.
+	 */
+	async getSafeSession() {
+		const {
+			data: { session },
+		} = await this.supabase.auth.getSession();
 
-    if (!session) {
-      return { session: null, user: null, error: "No session found" };
-    }
+		if (!session) {
+			return { session: null, user: null, error: "No session found" };
+		}
 
-    const {
-      data: { user },
-      error: userError,
-    } = await this.supabase.auth.getUser();
-    if (userError) {
-      return { session, user: null, error: userError.message };
-    }
+		const {
+			data: { user },
+			error: userError,
+		} = await this.supabase.auth.getUser();
+		if (userError) {
+			return { session, user: null, error: userError.message };
+		}
 
-    return { session, user, error: null };
-  }
+		return { session, user, error: null };
+	}
 
-  /**
-   * Example login method that uses the private supabase client.
-   */
-  async login(email: string, password: string) {
-    const { data, error } = await this.supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+	/**
+	 * Example login method that uses the private supabase client.
+	 */
+	async login(email: string, password: string) {
+		const { data, error } = await this.supabase.auth.signInWithPassword({
+			email,
+			password,
+		});
 
-    if (error) {
-      console.error("Login error:", error.message);
-      return { error: error.message };
-    }
+		if (error) {
+			console.error("Login error:", error.message);
+			return { error: error.message };
+		}
 
-    console.info("Login successful:", data);
-    return { error: undefined };
-  }
+		console.info("Login successful:", data);
+		return { error: undefined };
+	}
+
+	fetchHotlines = async () => {
+		return this.supabase.from('hotlines').select('*');
+	}
+
+	addHotline = async (payload: Database["public"]["Tables"]["hotlines"]["Insert"]) => {
+		return this.supabase.from('hotlines').insert(payload).select();
+	}
+
+	updateHotline = async (
+		id: string,
+		payload: Partial<Database["public"]["Tables"]["hotlines"]["Update"]>
+	) => {
+		return this.supabase.from('hotlines').update(payload).eq('id', id).select();
+	}
+
+	deleteHotline = async (id: string) => {
+		return this.supabase.from('hotlines').delete().eq('id', id).select();
+	}
 }
 
 /**
@@ -143,12 +163,13 @@ export class DispatchClient {
  * These helpers make it clearer in consumer code what to call.
  */
 export function initDispatchClient(options: DispatchClientOptions) {
-  return DispatchClient.init(options);
+	return DispatchClient.init(options);
 }
 
 export function getDispatchClient() {
-  return DispatchClient.getInstance();
+	return DispatchClient.getInstance();
 }
 
 export * from "./id.ts";
 export * from "./react/providers/auth-provider.tsx";
+export * from "./react/hooks/useHotlines.ts";

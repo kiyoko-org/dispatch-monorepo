@@ -53,6 +53,33 @@ export type Database = {
         }
         Relationships: []
       }
+      hotlines: {
+        Row: {
+          available: boolean
+          created_at: string
+          description: string | null
+          id: number
+          name: string
+          phone_number: string
+        }
+        Insert: {
+          available: boolean
+          created_at?: string
+          description?: string | null
+          id?: number
+          name: string
+          phone_number: string
+        }
+        Update: {
+          available?: boolean
+          created_at?: string
+          description?: string | null
+          id?: number
+          name?: string
+          phone_number?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null

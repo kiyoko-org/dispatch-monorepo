@@ -14,6 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      categories: {
+        Row: {
+          created_at: string
+          id: number
+          sub_categories: string[] | null
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          sub_categories?: string[] | null
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          sub_categories?: string[] | null
+        }
+        Relationships: []
+      }
       emergency_calls: {
         Row: {
           call_timestamp: string | null
@@ -117,12 +135,11 @@ export type Database = {
         Row: {
           attachments: string[] | null
           brief_description: string | null
+          category_id: number | null
           city: string | null
           created_at: string
           id: number
-          incident_category: string | null
           incident_date: string | null
-          incident_subcategory: string | null
           incident_time: string | null
           incident_title: string | null
           injuries_reported: string | null
@@ -139,6 +156,7 @@ export type Database = {
           share_with_community: boolean | null
           status: string
           street_address: string | null
+          sub_category: number | null
           suspect_description: string | null
           what_happened: string | null
           who_was_involved: string | null
@@ -147,12 +165,11 @@ export type Database = {
         Insert: {
           attachments?: string[] | null
           brief_description?: string | null
+          category_id?: number | null
           city?: string | null
           created_at?: string
           id?: number
-          incident_category?: string | null
           incident_date?: string | null
-          incident_subcategory?: string | null
           incident_time?: string | null
           incident_title?: string | null
           injuries_reported?: string | null
@@ -169,6 +186,7 @@ export type Database = {
           share_with_community?: boolean | null
           status?: string
           street_address?: string | null
+          sub_category?: number | null
           suspect_description?: string | null
           what_happened?: string | null
           who_was_involved?: string | null
@@ -177,12 +195,11 @@ export type Database = {
         Update: {
           attachments?: string[] | null
           brief_description?: string | null
+          category_id?: number | null
           city?: string | null
           created_at?: string
           id?: number
-          incident_category?: string | null
           incident_date?: string | null
-          incident_subcategory?: string | null
           incident_time?: string | null
           incident_title?: string | null
           injuries_reported?: string | null
@@ -199,12 +216,20 @@ export type Database = {
           share_with_community?: boolean | null
           status?: string
           street_address?: string | null
+          sub_category?: number | null
           suspect_description?: string | null
           what_happened?: string | null
           who_was_involved?: string | null
           witness_contact_info?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "reports_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "reports_reporter_id_fkey"
             columns: ["reporter_id"]

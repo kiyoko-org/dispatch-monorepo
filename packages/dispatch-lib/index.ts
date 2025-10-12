@@ -156,6 +156,10 @@ export class DispatchClient {
 	deleteHotline = async (id: string) => {
 		return this.supabase.from('hotlines').delete().eq('id', id).select();
 	}
+
+	getCategories = async () => {
+		return this.supabase.from('categories').select('*');
+	}
 }
 
 /**

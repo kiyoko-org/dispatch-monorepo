@@ -1,0 +1,3 @@
+[submodule "packages/dashboard-frontend"]
+	path = packages/dashboard-frontend
+	url = https://github.com/kiyoko-org/dashboard-frontend

@@ -2,6 +2,7 @@ import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import type { SupabaseClient, SupportedStorage } from "@supabase/supabase-js";
 import { SupabaseAuthClient } from "@supabase/supabase-js/dist/module/lib/SupabaseAuthClient";
 import type { Database } from "./database.types";
+import { hotlineSchema } from "./types";
 
 interface SupabaseClientOptions {
 	url: string;
@@ -140,14 +141,16 @@ export class DispatchClient {
 	}
 
 	addHotline = async (payload: Database["public"]["Tables"]["hotlines"]["Insert"]) => {
-		return this.supabase.from('hotlines').insert(payload).select();
+		const validated = hotlineSchema.parse(payload);
+		return this.supabase.from('hotlines').insert(validated).select();
 	}
 
 	updateHotline = async (
 		id: string,
 		payload: Partial<Database["public"]["Tables"]["hotlines"]["Update"]>
 	) => {
-		return this.supabase.from('hotlines').update(payload).eq('id', id).select();
+		const validated = hotlineSchema.partial().parse(payload);
+		return this.supabase.from('hotlines').update(validated).eq('id', id).select();
 	}
 
 	deleteHotline = async (id: string) => {
@@ -171,5 +174,6 @@ export function getDispatchClient() {
 }
 
 export * from "./id.ts";
+export * from "./types";
 export * from "./react/providers/auth-provider.tsx";
 export * from "./react/hooks/useHotlines.ts";

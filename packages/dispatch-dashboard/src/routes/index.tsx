@@ -1,39 +1,32 @@
-import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router'
-import { useAuthContext } from 'dispatch-lib'
-import { dispatch } from '@/lib/dispatch'
+"use client"
 
-export const Route = createFileRoute('/')({
-  component: App,
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router"
+import { useAuthContext } from "@/auth/AuthProvider"
+import { dispatch } from "@/lib/supabase"
+
+export const Route = createFileRoute("/")({
+	beforeLoad: async ({ location }) => {
+		const { data } = await dispatch.auth.getSession()
+		if (!data.session) {
+			throw redirect({ to: "/login", search: { redirect: location.href } })
+		}
+	},
+	component: DispatchDashboard
 })
 
-function App() {
-  dispatch
 
-  const { user, isLoading, signOut } = useAuthContext()
+export default function DispatchDashboard() {
+	const { user: authUser, signOut } = useAuthContext()
 
-  const navigate = useNavigate()
+	const displayName = (() => {
+		const meta = (authUser as any)?.user_metadata || {}
+		const name = [meta.first_name, meta.last_name].filter(Boolean).join(" ")
+		return name || meta.badgenumber || authUser?.email || "Profile"
+	})()
 
-  if (isLoading) {
-    return <div>Loading...</div>
-  }
-
-  if (!user) {
-    return redirect({ to: '/login' })
-  }
-
-  return (
-    <div>
-      <h1>Welcome, {user.user_metadata.name}!</h1>
-      {/* Rest of the app */}
-      <button
-        onClick={() => {
-          signOut()
-
-          navigate({ to: '/login' })
-        }}
-      >
-        Sign Out
-      </button>
-    </div>
-  )
+	return (
+		<div className="min-h-screen bg-background p-6">
+			{displayName}
+		</div>
+	)
 }

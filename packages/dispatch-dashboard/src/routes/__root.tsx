@@ -1,46 +1,22 @@
-import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
+import { Outlet, createRootRoute, useLocation } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
-import { TanStackDevtools } from '@tanstack/react-devtools'
-import { AuthProvider } from 'dispatch-lib'
+import { TanstackDevtools } from '@tanstack/react-devtools'
+import { AuthProvider } from '@/auth/AuthProvider'
 
-import appCss from '../styles.css?url'
+import Header from '../components/Header'
 
 export const Route = createRootRoute({
-  head: () => ({
-    meta: [
-      {
-        charSet: 'utf-8',
-      },
-      {
-        name: 'viewport',
-        content: 'width=device-width, initial-scale=1',
-      },
-      {
-        title: 'TanStack Start Starter',
-      },
-    ],
-    links: [
-      {
-        rel: 'stylesheet',
-        href: appCss,
-      },
-    ],
-  }),
+  component: () => {
+    const location = useLocation()
+    const hideHeader = location.pathname === '/login' || location.pathname === '/'
 
-  shellComponent: RootDocument,
-})
-
-function RootDocument({ children }: { children: React.ReactNode }) {
-  return (
-    <html lang="en">
-      <head>
-        <HeadContent />
-      </head>
-      <body>
-        <AuthProvider>{children}</AuthProvider>
-        <TanStackDevtools
+    return (
+      <AuthProvider>
+        {!hideHeader && <Header />}
+        <Outlet />
+        <TanstackDevtools
           config={{
-            position: 'bottom-right',
+            position: 'bottom-left',
           }}
           plugins={[
             {
@@ -49,8 +25,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
             },
           ]}
         />
-        <Scripts />
-      </body>
-    </html>
-  )
-}
+      </AuthProvider>
+    )
+  },
+})

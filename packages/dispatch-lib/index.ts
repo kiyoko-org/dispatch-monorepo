@@ -1,9 +1,13 @@
-import { createClient as createSupabaseClient, SupabaseClient, type SupportedStorage } from '@supabase/supabase-js';
+import {
+	createClient as createSupabaseClient
+} from '@supabase/supabase-js';
+import type { SupabaseClient, SupportedStorage } from '@supabase/supabase-js';
 import { SupabaseAuthClient } from '@supabase/supabase-js/dist/module/lib/SupabaseAuthClient';
 
 interface SupabaseClientOptions {
 	url: string,
 	anonymousKey: string,
+	detectSessionInUrl?: boolean,
 	storage?: SupportedStorage
 }
 
@@ -30,7 +34,7 @@ export class DispatchClient {
 					storage: supabaseClientConfig.storage,
 					autoRefreshToken: true,
 					persistSession: true,
-					detectSessionInUrl: false,
+					detectSessionInUrl: supabaseClientConfig.detectSessionInUrl ?? false,
 				}
 			}
 		)
@@ -59,6 +63,19 @@ export class DispatchClient {
 
 		return { session, user, error: null };
 
+	}
+
+	async login(email: string, password: string) {
+		const { data, error } = await this.supabase.auth.signInWithPassword({
+			email,
+			password
+		})
+
+		if (error) {
+			console.error('Login error:', error.message);
+		}
+
+		console.info('Login successful:', data);
 	}
 
 }

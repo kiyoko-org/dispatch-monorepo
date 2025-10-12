@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label'
 import { createFileRoute } from '@tanstack/react-router'
 import { useForm } from '@tanstack/react-form'
 import * as z from "zod"
+import { dispatch } from '@/lib/dispatch'
 
 export const Route = createFileRoute('/(auth)/login')({
 	component: RouteComponent,
@@ -27,6 +28,8 @@ function RouteComponent() {
 		},
 		onSubmit: async ({ value }) => {
 			console.info("You submitted: ", value)
+
+			dispatch.login(value.email, value.password)
 		}
 	})
 
@@ -99,7 +102,7 @@ function RouteComponent() {
 						</form>
 					</CardContent>
 					<CardFooter>
-						Don't have an account? <a href="#" className='text-blue-500 hover:underline'>&nbsp;Sign up</a>
+						Don't have an account? <a href="/signup" className='text-blue-500 hover:underline'>&nbsp;Sign up</a>
 					</CardFooter>
 				</Card>
 			</div>

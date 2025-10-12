@@ -1,3 +1,6 @@
 [submodule "packages/dashboard-frontend"]
 	path = packages/dashboard-frontend
 	url = https://github.com/kiyoko-org/dashboard-frontend
+[submodule "packages/super_admin"]
+	path = packages/super_admin
+	url = https://github.com/kiyoko-org/super_admin

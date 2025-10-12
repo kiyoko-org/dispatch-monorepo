@@ -4,3 +4,6 @@
 [submodule "packages/super_admin"]
 	path = packages/super_admin
 	url = https://github.com/kiyoko-org/super_admin
+[submodule "packages/dispatch"]
+	path = packages/dispatch
+	url = https://github.com/kiyoko-org/dispatch

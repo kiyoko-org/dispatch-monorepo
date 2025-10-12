@@ -1,22 +1,39 @@
+import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router'
+import { useAuthContext } from 'dispatch-lib'
 import { dispatch } from '@/lib/dispatch'
-import { createFileRoute, redirect } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/')({
-	component: App,
-	beforeLoad: async () => {
-		const response = await dispatch.getSafeSession()
-
-		if (response.error) {
-			console.error('Error fetching session:', response.error)
-		}
-
-		if (!response.user) {
-			throw redirect({
-				to: '/login',
-			})
-		}
-	}
+  component: App,
 })
 
 function App() {
+  dispatch
+
+  const { user, isLoading, signOut } = useAuthContext()
+
+  const navigate = useNavigate()
+
+  if (isLoading) {
+    return <div>Loading...</div>
+  }
+
+  if (!user) {
+    return redirect({ to: '/login' })
+  }
+
+  return (
+    <div>
+      <h1>Welcome, {user.user_metadata.name}!</h1>
+      {/* Rest of the app */}
+      <button
+        onClick={() => {
+          signOut()
+
+          navigate({ to: '/login' })
+        }}
+      >
+        Sign Out
+      </button>
+    </div>
+  )
 }

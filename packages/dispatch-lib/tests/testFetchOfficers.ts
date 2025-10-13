@@ -17,3 +17,5 @@ const client = initDispatchClient({
 })
 
 client.fetchOfficers().then(console.log)
+
+client.archiveReport(40).then(console.log)

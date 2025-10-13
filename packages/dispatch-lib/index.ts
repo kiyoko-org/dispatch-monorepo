@@ -196,6 +196,10 @@ export class DispatchClient {
 			email_confirm: false
 		})
 	}
+
+	archiveReport = async (report_id: number) => {
+		return this.supabase.from('reports').update({ is_archived: true }).eq('id', report_id).select();
+	}
 }
 
 /**

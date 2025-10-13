@@ -109,6 +109,7 @@ export type Database = {
           id: string
           last_name: string | null
           middle_name: string | null
+          rank: string | null
           role: Database["public"]["Enums"]["role"]
           updated_at: string | null
         }
@@ -119,6 +120,7 @@ export type Database = {
           id: string
           last_name?: string | null
           middle_name?: string | null
+          rank?: string | null
           role?: Database["public"]["Enums"]["role"]
           updated_at?: string | null
         }
@@ -129,6 +131,7 @@ export type Database = {
           id?: string
           last_name?: string | null
           middle_name?: string | null
+          rank?: string | null
           role?: Database["public"]["Enums"]["role"]
           updated_at?: string | null
         }
@@ -147,6 +150,7 @@ export type Database = {
           incident_title: string | null
           injuries_reported: string | null
           is_anonymous: boolean | null
+          is_archived: boolean | null
           latitude: number
           longitude: number
           nearby_landmark: string | null
@@ -177,6 +181,7 @@ export type Database = {
           incident_title?: string | null
           injuries_reported?: string | null
           is_anonymous?: boolean | null
+          is_archived?: boolean | null
           latitude: number
           longitude: number
           nearby_landmark?: string | null
@@ -207,6 +212,7 @@ export type Database = {
           incident_title?: string | null
           injuries_reported?: string | null
           is_anonymous?: boolean | null
+          is_archived?: boolean | null
           latitude?: number
           longitude?: number
           nearby_landmark?: string | null

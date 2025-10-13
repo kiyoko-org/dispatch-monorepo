@@ -177,6 +177,21 @@ export class DispatchClient {
 	deleteCategory = async (id: string) => {
 		return this.supabase.from('categories').delete().eq('id', id).select();
 	}
+
+	createOfficer = async (badgeNumber: string, rank: string, first_name: string, last_name: string, password: string) => {
+		return this.supabase.auth.admin.createUser({
+			email: "stvndvmrnd@gmail.com",
+			password: password,
+			user_metadata: {
+				badge_number: badgeNumber,
+				rank: rank,
+				first_name: first_name,
+				last_name: last_name,
+				role: "officer"
+			},
+			email_confirm: false
+		})
+	}
 }
 
 /**

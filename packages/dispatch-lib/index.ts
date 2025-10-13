@@ -161,6 +161,10 @@ export class DispatchClient {
 		return this.supabase.from('categories').select('*');
 	}
 
+	fetchOfficers = async () => {
+		return this.supabase.from('profiles').select('*').eq('role', 'officer');
+	}
+
 	addCategory = async (payload: Partial<Database["public"]["Tables"]["categories"]["Update"]>) => {
 		const validated = categorySchema.parse(payload);
 		return this.supabase.from('categories').insert(validated).select();
@@ -214,3 +218,4 @@ export * from "./types";
 export * from "./react/providers/auth-provider.tsx";
 export * from "./react/hooks/useHotlines.ts";
 export * from "./react/hooks/useCategories.ts";
+export * from "./react/hooks/useOfficers.ts";

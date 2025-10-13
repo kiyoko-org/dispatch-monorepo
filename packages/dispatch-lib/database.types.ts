@@ -18,16 +18,19 @@ export type Database = {
         Row: {
           created_at: string
           id: number
+          name: string
           sub_categories: string[] | null
         }
         Insert: {
           created_at?: string
           id?: number
+          name: string
           sub_categories?: string[] | null
         }
         Update: {
           created_at?: string
           id?: number
+          name?: string
           sub_categories?: string[] | null
         }
         Relationships: []
@@ -148,11 +151,11 @@ export type Database = {
           longitude: number
           nearby_landmark: string | null
           number_of_witnesses: string | null
-          priority: string
           property_damage: string | null
           province: string | null
           reporter_id: string
           request_follow_up: boolean | null
+          resolved_at: string | null
           share_with_community: boolean | null
           status: string
           street_address: string | null
@@ -178,11 +181,11 @@ export type Database = {
           longitude: number
           nearby_landmark?: string | null
           number_of_witnesses?: string | null
-          priority?: string
           property_damage?: string | null
           province?: string | null
           reporter_id?: string
           request_follow_up?: boolean | null
+          resolved_at?: string | null
           share_with_community?: boolean | null
           status?: string
           street_address?: string | null
@@ -208,11 +211,11 @@ export type Database = {
           longitude?: number
           nearby_landmark?: string | null
           number_of_witnesses?: string | null
-          priority?: string
           property_damage?: string | null
           province?: string | null
           reporter_id?: string
           request_follow_up?: boolean | null
+          resolved_at?: string | null
           share_with_community?: boolean | null
           status?: string
           street_address?: string | null

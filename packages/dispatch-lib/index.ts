@@ -2,7 +2,7 @@ import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import type { SupabaseClient, SupportedStorage } from "@supabase/supabase-js";
 import { SupabaseAuthClient } from "@supabase/supabase-js/dist/module/lib/SupabaseAuthClient";
 import type { Database } from "./database.types";
-import { hotlineSchema } from "./types";
+import { categorySchema, hotlineSchema } from "./types";
 
 interface SupabaseClientOptions {
 	url: string;
@@ -160,6 +160,19 @@ export class DispatchClient {
 	getCategories = async () => {
 		return this.supabase.from('categories').select('*');
 	}
+
+	addCategory = async (payload: Partial<Database["public"]["Tables"]["categories"]["Update"]>) => {
+		const validated = categorySchema.parse(payload);
+		return this.supabase.from('categories').insert(validated).select();
+	}
+
+	updateCategory = async (
+		id: string,
+		payload: Partial<Database["public"]["Tables"]["categories"]["Update"]>
+	) => {
+		const validated = categorySchema.partial().parse(payload);
+		return this.supabase.from('categories').update(validated).eq('id', id).select();
+	}
 }
 
 /**
@@ -181,3 +194,4 @@ export * from "./id.ts";
 export * from "./types";
 export * from "./react/providers/auth-provider.tsx";
 export * from "./react/hooks/useHotlines.ts";
+export * from "./react/hooks/useCategories.ts";

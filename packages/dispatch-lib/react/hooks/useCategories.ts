@@ -9,6 +9,7 @@ type UseCategoriesReturn = {
 	loading: boolean
 	addCategory: (payload: Database["public"]["Tables"]["categories"]["Insert"]) => Promise<{ data: any[] | null; error: any }>
 	updateCategory: (id: number, payload: Partial<Database["public"]["Tables"]["categories"]["Update"]>) => Promise<{ data: any[] | null; error: any }>
+	deleteCategory: (id: number) => Promise<{ data: any[] | null; error: any }>
 }
 
 let cachedCategories: Category[] | null = null
@@ -79,5 +80,18 @@ export function useCategories(): UseCategoriesReturn {
 		return { data, error };
 	}
 
-	return { categories, loading, addCategory, updateCategory }
+	async function deleteCategory(id: number) {
+		const { data, error } = await client.deleteCategory(id.toString());
+		if (error) {
+			console.error("Error deleting category:", error);
+		}
+		if (data) {
+			const newCategories = categories.filter(c => c.id !== id);
+			setCategories(newCategories);
+			cachedCategories = newCategories;
+		}
+		return { data, error };
+	}
+
+	return { categories, loading, addCategory, updateCategory, deleteCategory }
 }

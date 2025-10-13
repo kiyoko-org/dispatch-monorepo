@@ -173,6 +173,10 @@ export class DispatchClient {
 		const validated = categorySchema.partial().parse(payload);
 		return this.supabase.from('categories').update(validated).eq('id', id).select();
 	}
+
+	deleteCategory = async (id: string) => {
+		return this.supabase.from('categories').delete().eq('id', id).select();
+	}
 }
 
 /**

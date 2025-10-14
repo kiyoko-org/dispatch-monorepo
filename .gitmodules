@@ -7,3 +7,6 @@
 [submodule "packages/dispatch"]
 	path = packages/dispatch
 	url = https://github.com/kiyoko-org/dispatch
+[submodule "packages/dispatch-lib"]
+	path = packages/dispatch-lib
+	url = https://github.com/kiyoko-org/dispatch-lib

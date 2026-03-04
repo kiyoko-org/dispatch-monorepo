@@ -3,7 +3,7 @@ DROP FUNCTION IF EXISTS public.get_profiles_with_emails();
 
 -- 2. Create the new function with updated return table structure
 -- This merges data from public.profiles, auth.users, and public.officers for the Admin Dashboard
--- Run this in the Supabase SQL Editor (https://supabase.com/dashboard/project/xoefwkpyvjtosveknngo/sql)
+-- UPDATED: Ensures trust_factors always has a valid JSON structure for the UI
 
 CREATE OR REPLACE FUNCTION public.get_profiles_with_emails()
 RETURNS TABLE (
@@ -37,9 +37,19 @@ BEGIN
     u.email::TEXT,
     u.created_at as joined_date,
     u.last_sign_in_at,
-    (SELECT (SELECT count(*) FROM public.reports r WHERE r.reporter_id = p.id)) as reports_count,
+    (SELECT count(*) FROM public.reports r WHERE r.reporter_id = p.id) as reports_count,
     p.trust_score,
-    p.trust_factors
+    -- Fallback: If factors are NULL or empty, build a default object with the live count
+    COALESCE(
+      NULLIF(p.trust_factors, '{}'::jsonb),
+      jsonb_build_object(
+        'total_reports', (SELECT count(*) FROM public.reports r WHERE r.reporter_id = p.id),
+        'verified_reports', 0,
+        'false_reports', 0,
+        'cancelled_reports', 0,
+        'calculated_at', now()
+      )
+    ) as trust_factors
   FROM 
     public.profiles p
   LEFT JOIN 
@@ -51,6 +61,17 @@ BEGIN
 END;
 $$;
 
--- 3. Grant execution to authenticated users (Admins) and service role
+-- 3. Grant execution
 GRANT EXECUTE ON FUNCTION public.get_profiles_with_emails() TO authenticated;
 GRANT EXECUTE ON FUNCTION public.get_profiles_with_emails() TO service_role;
+
+-- 4. One-time data fix: Initialize trust_factors for anyone missing them
+UPDATE public.profiles 
+SET trust_factors = jsonb_build_object(
+  'total_reports', (SELECT count(*) FROM public.reports r WHERE r.reporter_id = profiles.id),
+  'verified_reports', 0,
+  'false_reports', 0,
+  'cancelled_reports', 0,
+  'calculated_at', now()
+)
+WHERE trust_factors IS NULL OR trust_factors = '{}'::jsonb;

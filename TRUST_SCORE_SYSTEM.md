@@ -47,23 +47,35 @@ Points are calculated dynamically whenever a report is Created, Updated, or Dele
 
 The shared library provides methods for both automated and manual trust management.
 
+### DispatchClient Configuration
+The `DispatchClient` is environment-aware. When initialized in the Dashboard, it uses a **Proxy Mode**:
+
+```typescript
+initDispatchClient({
+  supabaseClientConfig: { ... },
+  useProxy: true // Enabled in the Admin Dashboard
+});
+```
+
 ### Methods
-- `updateTrustScore(userId, score)`: Manual admin override (0-3).
+- `fetchProfilesWithEmails()`: Unified method to get profiles with auth data. In Proxy Mode, it routes through the Dashboard's secure API.
+- `updateTrustScore(userId, score)`: Manual admin override (0-3). In Proxy Mode, it uses the Service Role via the backend proxy to bypass RLS.
 - `incrementTrustScore(userId)` / `decrementTrustScore(userId)`: Relative adjustments with boundary safety.
 - `updateTrustFactors(userId, factors)`: Merges custom metadata into the JSON storage.
-
-### Schema Validation
-- **`reportSchema`**: Includes `false_report: boolean` and allows partial updates to `status`.
-- **`profileSchema`**: Includes `trust_score` and `trust_factors` with Zod validation.
 
 ---
 
 ## 4. Frontend Implementation
 
-### Admin Dashboard
+### Secure Admin Proxy (`dashboard-frontend`)
+The Admin Dashboard includes a secure API route at `/api/profiles` that acts as an elevated bridge between the browser and Supabase.
+- **GET**: Fetches profile data merged with `auth.users` emails (using Service Role).
+- **PATCH**: Performs manual trust score overrides (using Service Role).
+
+### User Interface
 - **Shield Badges**: Color-coded visual indicators for user reliability.
-- **Incident Verification**: Admins can mark a report as "False" in the Incident Detail dialog, which instantly triggers a score drop for the reporter.
-- **Trust Management Dialog**: Allows admins to view the "Trust Factors" breakdown and manually override a score if necessary.
+- **Incident Verification**: Admins can mark a report as "False" in the Incident Detail dialog, which instantly triggers a score drop for the reporter via the database engine.
+- **Trust Management Dialog**: Allows admins to view the "Trust Factors" breakdown and manually override a score. These changes are saved securely through the library's proxy mode.
 
 ---
 

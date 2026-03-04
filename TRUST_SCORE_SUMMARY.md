@@ -12,54 +12,38 @@ This document summarizes the changes made to implement a comprehensive, backend-
 Implemented a "Source of Truth" scoring engine in the database.
 - **Function**: `recalculate_user_trust_score(user_uuid)`
 - **Trigger**: `trigger_recalculate_trust_score` on the `reports` table.
-- **Logic**:
-    - **Base**: +5 points per report (max 25).
-    - **Resolved Bonus**: +10 points per resolved report.
-    - **False Penalty**: -20 points per false report.
-    - **Cancelled Penalty**: -5 points per cancelled report.
-- **Levels**:
-    - `3` (Highly Trusted): 75+ points.
-    - `2` (Trusted): 50-74 points.
-    - `1` (Low Trust): 25-49 points.
-    - `0` (Untrusted): <25 points.
+- **Logic**: Base points (+5), Resolved bonus (+10), False penalty (-20), and Cancelled penalty (-5).
+- **Function Update**: Replaced `get_profiles_with_emails` to include trust fields and fix data type mismatches for the Admin Dashboard.
 
 ## 2. Shared Library (`dispatch-lib`)
 
 ### Type Integrity
 - **Zod Schemas**: Added `trustFactorsSchema` and `profileSchema` for runtime validation.
-- **TypeScript**: Regenerated `database.types.ts` from the remote Supabase instance to ensure 100% synchronization.
+- **TypeScript**: Regenerated `database.types.ts` and manually synchronized RPC return types to include trust data.
+
+### Environment-Aware Client (`DispatchClient`)
+- **`useProxy` Mode**: Added a configuration flag that allows the client to detect if it is running in the Dashboard.
+- **Unified Methods**: `fetchProfilesWithEmails` and `updateTrustScore` automatically route through a secure API proxy when `useProxy` is true, ensuring compatibility with browser security and RLS.
+- **React Native Compatibility**: Maintained 100% compatibility with the mobile app by avoiding browser-only globals like `window` in the core logic.
 
 ### New Hooks
-- **`useProfile(userId)`**: Provides real-time, single-user profile data (used for the mobile app).
-- **`useTrustScores()`**: Admin-focused hook that merges profile data, auth metadata (Join Date, Last Active), and report counts with real-time updates.
-
-### DispatchClient Methods
-- `updateTrustScore`: Manual override for admins.
-- `incrementTrustScore` / `decrementTrustScore`: Helper methods for relative adjustments.
-- `updateTrustFactors`: Merges metadata into the JSONB storage.
+- **`useTrustScores()`**: Fully refactored to use the unified library methods. It provides real-time updates and handles the complexity of secure admin operations behind a clean interface.
 
 ## 3. Admin Dashboard (`dashboard-frontend`)
 
+### Secure Admin Proxy (`/api/profiles`)
+- Implemented a backend API route that uses the **Service Role Key** to perform elevated operations (fetching auth emails and manual trust overrides) that are restricted in the browser.
+
 ### Users Management Page
-- **Visual Badges**: Added color-coded shield badges for each trust level.
-- **Filtering**: Added filters to view users by Role and Trust Level.
-- **Stats Card**: Added a new card tracking "Highly Trusted" users.
-- **Edit Dialog**:
-    - Admins can now manually adjust a user's trust level.
-    - Displays a breakdown of **Trust Factors** (total reports, false reports, etc.) directly from the backend calculation.
+- **Functional Dialogs**: The "Edit Trust" dialog is now fully wired to the backend. Admins can view real-time factors and manually override any user's trust level.
+- **Shield Badges**: Visual color-coded shields representing levels 0-3.
+- **Stats**: Real-time tracking of "Highly Trusted" users.
 
-### Incidents Management Page
-- **False Report Toggle**: Added a switch in the Incident Edit dialog to mark reports as false.
-- **Backend Integration**: Marking a report as "False" now automatically triggers the database to decrement the reporter's trust score in real-time.
-- **UI Indicators**: Reports marked as false now display a destructive "FALSE REPORT" badge in the table.
-
-## 4. Technical Quality & Fixes
-- Fixed JSX syntax errors in the Incident Page.
-- Resolved type conflicts between `Profile` metadata and database rows.
-- Synchronized property names (`what_happened`) with the database schema.
-- Cleaned up `tailwind.config.ts` duplicate keys.
-- Verified type safety across the library and dashboard.
+## 4. Technical Quality & Testing
+- **Integration Tests**: Added `testScoringEngine.ts` (verifies DB triggers) and `testTrustScore.ts` (verifies library overrides).
+- **Type Safety**: Passed full `tsc` check across the monorepo.
+- **Documentation**: Created `TRUST_SCORE_SYSTEM.md` (Technical Reference) and `AGENTS.md` (Onboarding).
 
 ---
-**Status**: Implementation Complete & Type-Safe.
+**Status**: Fully Integrated, Secure & Verified.
 **Date**: March 4, 2026

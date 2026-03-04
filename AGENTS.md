@@ -44,8 +44,12 @@ cd packages/dispatch-lib && bun run sync-types
 
 ## 4. Key Symbols
 - `DispatchClient`: Singleton class for all database interactions.
-- `useTrustScores()`: Primary hook for admin-level user reputation management.
-- `recalculate_user_trust_score`: Postgres trigger function (The scoring engine).
+- `useTrustScores()`: Primary hook for admin-level user reputation management (Manual overrides).
+- `cancellation_reason`: Field in `reports` used to track reason for closure (e.g., 'Prank Call', 'Duplicate').
 
----
-**Goal**: Maintain a type-safe, backend-driven architecture where the database is the source of truth.
+## 5. Trust Score System (Simplified)
+The system is entirely admin-driven. Users start at trust level 0.
+- **Manual Increments**: Admins can prompt to increase trust when resolving a report.
+- **Auto-Decrement**: Trust score decreases by 1 if a report is cancelled with the reason 'Prank Call' (capped at 0).
+- **No Automated Engine**: There are no background triggers calculating points; all adjustments are explicit or tied to specific admin actions.
+
